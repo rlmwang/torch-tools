@@ -1,62 +1,13 @@
-# %% [code]
 import torch, numpy as np
-
 from time import time
 from tqdm import tqdm
-from torch.utils.data import Dataset, DataLoader
-
-# %% [markdown]
-# # Slicing
 
 
-# %% [code]
-def gather_slice(inputs, dim, index, length):
-  """
-  Gather a slice (index : index + length) along dimension dim.
-  """
-  shape = torch.ones(len(inputs.shape))
-  shape[dim] = -1
-
-  slice = torch.arange(0, length, device=inputs.device)
-  slice = slice.view(tuple(int(s) for s in shape))
-
-  index = index.unsqueeze(dim)
-  index = index + slice
-  index = index.to(torch.int64)
-
-  return torch.gather(inputs, dim, index)
-
-
-# %% [code]
-def centered_slice(centers, length, lower_bound=0, upper_bound=None):
-  """
-  Create slices of equal length centered at the centers, 
-  contained within the lower and upper bounds.
-  """
-  start = centers - length / 2
-
-  if lower_bound is not None:
-    start = np.maximum(start, 0)
-
-  end = start + length
-    
-  if upper_bound is not None:
-    end = np.minimum(end, upper_bound)
-    start = end - length
-
-  return start, end
-
-# %% [markdown]
-# # Training
-
-
-# %% [code]
 def set_parameter_requires_grad(model, value):
   for param in model.parameters():
     param.requires_grad = value
 
 
-# %% [code]
 def evaluate(metrics, output, labels):
   """
   Default model evaluation.
@@ -75,7 +26,6 @@ def evaluate(metrics, output, labels):
   return scores
 
 
-# %% [code]
 class Checkpoint():
   def __init__(self, phase, metric):
     super().__init__()
@@ -102,8 +52,7 @@ class Checkpoint():
   def __repr__(self):
     return f'Best {self.phase} {self.metric}: {self.best:.4f}'
 
-    
-# %% [code]
+
 def epochs(start, stop):
   since = time()
 
@@ -132,7 +81,6 @@ def epochs(start, stop):
   print(f'Training complete in {m:.0f}m {s:.0f}s')
 
 
-# %% [code]
 def steps(epoch, dataloader, with_tqdm=True):
   desc = f'Epoch {epoch["curr"] + 1}/{epoch["stop"]}'
   
