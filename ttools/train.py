@@ -1,4 +1,5 @@
-import torch, numpy as np
+import torch
+import numpy as np
 from time import time
 from tqdm import tqdm
 
@@ -26,12 +27,13 @@ def evaluate(metrics, output, labels):
   return scores
 
 
-class Checkpoint():
+class Checkpoint:
   def __init__(self, phase, metric):
     super().__init__()
     self.phase = phase
     self.metric = metric
-    self.reset()
+    self.best = None
+    self.state_dict = None
 
   def step(self, epoch, model):
     loss = epoch['score'][self.phase][self.metric][-1]
