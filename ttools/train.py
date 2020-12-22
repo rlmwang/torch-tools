@@ -122,7 +122,6 @@ def steps(epoch, dataloader, with_tqdm=True):
         epoch['score'][p][m].append(s)
 
     
-# %% [code]
 def folds(splits):
   for k, split in enumerate(splits):
     print(12 * '-')
