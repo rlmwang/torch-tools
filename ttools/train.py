@@ -9,6 +9,23 @@ def set_parameter_requires_grad(model, value):
     param.requires_grad = value
 
 
+class no_grad:
+  def __init__(self, model):
+    super().__init__()
+    self.model = model
+    self.prev = []
+
+  def __enter__(self):
+    self.prev = [p.requires_grad for p in self.model.parameters()]
+    for p in self.model.parameters():
+      p.requires_grad = False
+    
+  def __exit__(self, type, value, traceback):
+    params = self.model.parameters()
+    for p, v in zip(params, self.prev):
+      p.requires_grad = v
+
+
 def evaluate(metrics, output, labels):
   """
   Default model evaluation.
