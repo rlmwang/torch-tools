@@ -31,7 +31,7 @@ class Checkpoint:
     self.state_dict = None
 
   def step(self, epoch, model):
-    loss = epoch['score'][self.phase][self.metric][-1]
+    loss = epoch[self.phase][self.metric][-1]
 
     if self.best is None or loss < self.best:
       self.state_dict = model.state_dict()
