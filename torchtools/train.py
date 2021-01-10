@@ -3,7 +3,7 @@ from sys import stderr
 from typing import Union
 from collections import defaultdict
 from time import time
-from tqdm.autonotebook import tqdm
+from tqdm import tqdm
 
 from torch import no_grad
 
