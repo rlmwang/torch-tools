@@ -98,6 +98,11 @@ class Score(object):
     return s.index(max(s))
 
 
+class ScoreDict(defaultdict):
+  def __init__(self):
+    super().__init__(Score)
+
+
 class epochs(object):
   def __init__(self, *args, file=stderr):
 
@@ -112,7 +117,7 @@ class epochs(object):
     self.stop = stop
     self.curr = start - 1
 
-    self.score = defaultdict(defaultdict(Score))
+    self.score = defaultdict(ScoreDict)
 
     self.since = time()
     self.file = file
@@ -137,18 +142,18 @@ class epochs(object):
     elapsed = time() - self.since
     m, s = elapsed // 60, elapsed % 60
 
-    loss = self.score['loss']
+    loss = self.score['train']['loss']
     index = loss.argmin()
 
     self.file.write('\n')
     self.file.write(f'Training complete in {m:.0f}m {s:.0f}s\n')
-    self.file.write(f'Best loss: {loss[index]:.4f} on epoch {index}')
+    self.file.write(f'Best train loss: {loss[index]:.4f} in epoch {index}')
 
     raise StopIteration
 
-  def log(self, score):
+  def log(self, score, phase):
     for key in score:
-      self.score[key].append(score[key], 1)
+      self.score[phase][key].append(score[key], 1)
 
 
 class steps(object):
@@ -156,18 +161,15 @@ class steps(object):
     lbar = '{desc}: {n_fmt}/{total_fmt} |'
     mbar = '{bar}'
     rbar = '| {elapsed_s:.0f}s,{rate_fmt}{postfix}'
+    desc = phase.capitalize()
 
     self.epoch = epoch
     self.phase = phase
-
     self.score = defaultdict(Score)
     
     self.iterable = tqdm(dataloader, file=file, unit='step',
         bar_format=f'{lbar}{mbar}{rbar}', **tqdm_kwargs)
     
-    # if epoch is not None:
-      # self.iterable.write(f'{epoch}:', file=file)
-
   def __len__(self):
     return len(self.iterable)
 
@@ -187,7 +189,7 @@ class steps(object):
 
     except StopIteration:
       if self.epoch is not None:
-        self.epoch.log(score)
+        self.epoch.log(score, self.phase)
       raise StopIteration
 
   def log(self, score, count):
