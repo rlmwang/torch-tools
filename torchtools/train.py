@@ -38,7 +38,7 @@ class Checkpoint:
       self.state_dict = model.state_dict()
       self.best = loss
 
-      file.write('Checkpoint.\n')
+      self.file.write('Checkpoint.\n')
 
   def load_state_dict(self, model):
     model.load_state_dict(self.state_dict)
