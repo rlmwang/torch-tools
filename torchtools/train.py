@@ -23,10 +23,11 @@ def validate(metrics, output, labels):
 
 
 class Checkpoint:
-  def __init__(self, phase, metric):
+  def __init__(self, phase, metric, file=stderr):
     super().__init__()
     self.phase = phase
     self.metric = metric
+    self.file = file
     self.best = None
     self.state_dict = None
 
@@ -37,7 +38,7 @@ class Checkpoint:
       self.state_dict = model.state_dict()
       self.best = loss
 
-      print('Checkpoint.', flush=True)
+      file.write('Checkpoint.\n')
 
   def load_state_dict(self, model):
     model.load_state_dict(self.state_dict)
