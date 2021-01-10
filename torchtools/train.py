@@ -168,7 +168,7 @@ class steps(object):
     self.score = defaultdict(Score)
     
     self.iterable = tqdm(dataloader, file=file, unit='step',
-        bar_format=f'{lbar}{mbar}{rbar}', **tqdm_kwargs)
+        bar_format=f'{lbar}{mbar}{rbar}', desc=desc, **tqdm_kwargs)
     
   def __len__(self):
     return len(self.iterable)
