@@ -4,22 +4,21 @@ from typing import Union
 from collections import defaultdict
 from time import time
 from tqdm import tqdm
-
 from torch import no_grad
 
 
-def validate(metrics, output, labels):
-  """Validate model output on a dictionary of metrics.
+def validate(metrics, scores, labels):
+  """Validate model scores on a dictionary of metrics.
   """
-  scores = {}
+  result = {}
   with no_grad():
-    output = output.detach()
+    scores = scores.detach()
     for key in metrics:
       try:
-        scores[key] = metrics[key](output, labels).item()
+        result[key] = metrics[key](scores, labels).item()
       except:
-        scores[key] = metrics[key](output.cpu(), labels.cpu())
-  return scores
+        result[key] = metrics[key](scores.cpu(), labels.cpu())
+  return result
 
 
 class Checkpoint:
@@ -33,11 +32,9 @@ class Checkpoint:
 
   def step(self, epoch, model):
     loss = epoch[self.phase][self.metric][-1]
-
     if self.best is None or loss < self.best:
-      self.state_dict = model.state_dict()
       self.best = loss
-
+      self.state_dict = model.state_dict()
       self.file.write('Checkpoint.\n')
 
   def load_state_dict(self, model):
@@ -110,7 +107,7 @@ class epochs(object):
     assert len(args) <= 2
     if len(args) == 1:
       start = 0
-      stop, = args
+      stop = args[0]
     elif len(args) == 2:
       start, stop = args
 
@@ -166,8 +163,7 @@ class steps(object):
 
     self.epoch = epoch
     self.phase = phase
-    self.score = defaultdict(Score)
-    
+    self.score = ScoreDict()
     self.iterable = tqdm(dataloader, file=file, unit='step',
         bar_format=f'{lbar}{mbar}{rbar}', desc=desc, **tqdm_kwargs)
     
@@ -184,10 +180,9 @@ class steps(object):
 
     score = {key: self.score[key][0] for key in self.score}
     self.iterable.set_postfix(score)
-    
+
     try:
       return self, next(self.iterator)
-
     except StopIteration:
       if self.epoch is not None:
         self.epoch.log(score, self.phase)
