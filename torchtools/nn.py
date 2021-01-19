@@ -52,12 +52,10 @@ class Scan(nn.Module):
     wdw = self.window
     hop = self.hop
     shp = inputs.shape[-1]
-    
     output = []
     for i in  torch.arange(0, shp - wdw + hop + 1e-6, hop):
       x = inputs[...,int(i):int(i+wdw)]
       output.append(self.model(x))
-
     return torch.stack(output, -1)
 
 
